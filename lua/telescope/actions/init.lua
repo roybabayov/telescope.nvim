@@ -631,6 +631,68 @@ actions.git_reset_hard = function(prompt_bufnr)
   git_reset_branch(prompt_bufnr, "--hard")
 end
 
+--- Create a new commit on current branch
+---@param prompt_bufnr number: The prompt bufnr
+actions.git_commit_new = function(prompt_bufnr)
+	local cwd = action_state.get_current_picker(prompt_bufnr).cwd
+
+	local commit_msg = vim.fn.input('Please enter the new commit message: ')
+	if string.len(commit_msg) == 0 then
+		print('\nDidn\'t create new commit')
+        return
+	end
+
+	local confirmation = vim.fn.input(string.format('Create new commit with message "%s"? [y/n]: ', commit_msg))
+	if string.len(confirmation) == 0 or string.sub(string.lower(confirmation), 0, 1) ~= "y" then
+		print('\nDidn\'t create new commit')
+		return
+	end
+
+	local stdout, ret, stderr = utils.get_os_command_output({ "git", "commit", "-m", commit_msg }, cwd)
+	if ret == 0 then
+		print(string.format('\nCreated new commit with message: "%s"', commit_msg))
+	else
+		print(string.format('\nError when creating new commit. Git returned stdout:"%s", stderr:"%s"', table.concat(stdout, ""), table.concat(stderr, "")))
+	end
+end
+
+--- amends the last commit on current branch
+---@param prompt_bufnr number: The prompt bufnr
+actions.git_commit_amend = function(prompt_bufnr)
+	local cwd = action_state.get_current_picker(prompt_bufnr).cwd
+	local stdout, ret, stderr = utils.get_os_command_output({ "git", "log", "--reverse", "-1", "--format=%B" }, cwd)
+	local current_commit_msg = table.concat(stdout, "")
+    if ret ~= 0 then
+        print(string.format('Error when fetching current commit. Git returned stdout:"%s", stderr:"%s"', current_commit_msg, table.concat(stderr, "")))
+    end
+
+	local new_commit_msg = ""
+	local create_new_msg_confirmation = vim.fn.input(string.format('current commit message is:\n%s\nWould you like to amend the commit message? [y/n]: ', current_commit_msg))
+    if string.len(create_new_msg_confirmation) == 0 or string.sub(string.lower(create_new_msg_confirmation), 0, 1) ~= "y" then
+		new_commit_msg = current_commit_msg
+	else
+		new_commit_msg = vim.fn.input('Please enter the new commit message: ')
+		if string.len(new_commit_msg) == 0 then   
+			print('\nDidn\'t amend the commit')
+			return
+		end
+    end
+
+    local confirmation = vim.fn.input(string.format('Amend current commit with current message "%s" to new message "%s"? [y/n]: ', current_commit_msg, new_commit_msg))
+    if string.len(confirmation) == 0 or string.sub(string.lower(confirmation), 0, 1) ~= "y" then
+        print('\nDidn\'t amend the commit')
+        return
+    end
+
+    local stdout, ret, stderr = utils.get_os_command_output({ "git", "commit", "--amend", "-m", new_commit_msg }, cwd)
+    if ret == 0 then
+        print(string.format('\nAmended current commit. New commit message: "%s"', new_commit_msg))
+    else
+        print(string.format('\nError when amending the commit. Git returned stdout:"%s", stderr:"%s"', table.concat(stdout, ""), table.concat(stderr, "")))
+    end
+
+end
+
 actions.git_checkout_current_buffer = function(prompt_bufnr)
   local cwd = action_state.get_current_picker(prompt_bufnr).cwd
   local selection = actions.get_selected_entry()

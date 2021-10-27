@@ -1093,53 +1093,51 @@ function make_entry.gen_from_commands(_)
   end
 end
 
-local git_icon_defaults = {
-  added = "+",
-  changed = "~",
-  copied = ">",
-  deleted = "-",
-  renamed = "➡",
-  unmerged = "‡",
-  untracked = "?",
-}
-
 function make_entry.gen_from_git_status(opts)
   opts = opts or {}
 
-  local col_width = ((opts.git_icons and opts.git_icons.added) and opts.git_icons.added:len() + 2) or 2
   local displayer = entry_display.create {
     separator = "",
     items = {
-      { width = col_width },
-      { width = col_width },
+      { width = 10 },
+      { width = 15 },
       { remaining = true },
     },
   }
 
-  local icons = vim.tbl_extend("keep", opts.git_icons or {}, git_icon_defaults)
-
-  local git_abbrev = {
-    ["A"] = { icon = icons.added, hl = "TelescopeResultsDiffAdd" },
-    ["U"] = { icon = icons.unmerged, hl = "TelescopeResultsDiffAdd" },
-    ["M"] = { icon = icons.changed, hl = "TelescopeResultsDiffChange" },
-    ["C"] = { icon = icons.copied, hl = "TelescopeResultsDiffChange" },
-    ["R"] = { icon = icons.renamed, hl = "TelescopeResultsDiffChange" },
-    ["D"] = { icon = icons.deleted, hl = "TelescopeResultsDiffDelete" },
-    ["?"] = { icon = icons.untracked, hl = "TelescopeResultsDiffUntracked" },
+  local git_diff_type_abbrev = {
+      ["A"] = "New file",
+      ["U"] = "Unmerged file",
+      ["M"] = "Changed file",
+      ["C"] = "Copied file",
+      ["R"] = "Renamed file",
+      ["D"] = "Deleted file",
+      ["?"] = "New file",
   }
 
   local make_display = function(entry)
-    local x = string.sub(entry.status, 1, 1)
-    local y = string.sub(entry.status, -1)
-    local status_x = git_abbrev[x] or {}
-    local status_y = git_abbrev[y] or {}
+    local unstaged_abbrev = string.sub(entry.status, 2, 2)
+	local staged_abbrev = string.sub(entry.status, 1, 1)
+	local staging_str = ""
+	local file_diff_type_str = "" 
+	local hl
 
-    local empty_space = " "
-    return displayer {
-      { status_x.icon or empty_space, status_x.hl },
-      { status_y.icon or empty_space, status_y.hl },
-      entry.value,
+	if unstaged_abbrev ~= " " then
+		staging_str = "Unstaged"
+		file_diff_type_str = git_diff_type_abbrev[unstaged_abbrev]
+		hl = "Constant"
+	else
+		staging_str = "Staged"
+		file_diff_type_str = git_diff_type_abbrev[staged_abbrev]
+		hl = "TelescopeTitle"
+	end
+
+	return displayer {
+        { staging_str, hl },
+        { file_diff_type_str, hl },
+        entry.value,
     }
+
   end
 
   return function(entry)

@@ -54,14 +54,31 @@ git.commits = function(opts)
       previewers.git_commit_message.new(opts),
     },
     sorter = conf.file_sorter(opts),
-    attach_mappings = function(_, map)
+    attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(actions.git_checkout)
+
+	actions.git_commit_new:enhance { 
+		post = function()                                                           
+        action_state.get_current_picker(prompt_bufnr):refresh(finders.new_oneshot_job(git_command, opts), { reset_prompt = true })
+        end,         
+    }
+      
+    actions.git_commit_amend:enhance {
+    	post = function()
+        action_state.get_current_picker(prompt_bufnr):refresh(finders.new_oneshot_job(git_command, opts), { reset_prompt = true })
+        end,
+	}
+
       map("i", "<c-r>m", actions.git_reset_mixed)
       map("n", "<c-r>m", actions.git_reset_mixed)
       map("i", "<c-r>s", actions.git_reset_soft)
       map("n", "<c-r>s", actions.git_reset_soft)
       map("i", "<c-r>h", actions.git_reset_hard)
       map("n", "<c-r>h", actions.git_reset_hard)
+	  map("i", "<c-c>n", actions.git_commit_new)
+      map("n", "<c-c>n", actions.git_commit_new)
+      map("i", "<c-c>a", actions.git_commit_amend)
+      map("n", "<c-c>a", actions.git_commit_amend)
       return true
     end,
   }):find()
