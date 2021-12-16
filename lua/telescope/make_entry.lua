@@ -334,6 +334,7 @@ function make_entry.gen_from_lsp_reference(opts)
   local displayer = entry_display.create {
     separator = "▏",
     items = {
+      { width = 3 },
       { width = 8 },
       { width = 50 },
       { remaining = true },
@@ -348,6 +349,7 @@ function make_entry.gen_from_lsp_reference(opts)
     print('hi', filename, line_info)
 
     return displayer {
+      "tmp"
       line_info,
       entry.text:gsub(".* | ", ""),
       filename,
