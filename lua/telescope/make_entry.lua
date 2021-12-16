@@ -328,6 +328,53 @@ function make_entry.gen_from_quickfix(opts)
   end
 end
 
+function make_entry.gen_from_lsp_reference(opts)
+  opts = opts or {}
+
+  local displayer = entry_display.create {
+    separator = "▏",
+    items = {
+      { width = 8 },
+      { width = 50 },
+      { remaining = true },
+    },
+  }
+
+  local make_display = function(entry)
+    local filename = utils.transform_path(opts, entry.filename)
+
+    local line_info = { table.concat({ entry.lnum, entry.col }, ":"), "TelescopeResultsLineNr" }
+
+    print('hi', filename, line_info)
+
+    return displayer {
+      line_info,
+      entry.text:gsub(".* | ", ""),
+      filename,
+    }
+  end
+
+  return function(entry)
+    local filename = entry.filename or vim.api.nvim_buf_get_name(entry.bufnr)
+
+    return {
+      valid = true,
+
+      value = entry,
+      ordinal = (not opts.ignore_filename and filename or "") .. " " .. entry.text,
+      display = make_display,
+
+      bufnr = entry.bufnr,
+      filename = filename,
+      lnum = entry.lnum,
+      col = entry.col,
+      text = entry.text,
+      start = entry.start,
+      finish = entry.finish,
+    }
+  end
+end
+
 function make_entry.gen_from_lsp_symbols(opts)
   opts = opts or {}
 
