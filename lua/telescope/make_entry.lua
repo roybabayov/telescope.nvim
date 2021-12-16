@@ -350,7 +350,7 @@ function make_entry.gen_from_lsp_reference(opts)
 
 
     local entry_type = "tmp "
-    position_params = { textDocument = { uri = vim.uri_from_fname(filename)}, position = { line = entry.lnum, character = entry.col} }
+    position_params = { textDocument = { uri = vim.uri_from_fname(entry.filename)}, position = { line = entry.lnum, character = entry.col} }
     results_lsp, err = vim.lsp.buf_request_sync(0, "textDocument/documentHighlight", position_params, opts.timeout or 10000)
     if err then
         entry_type = "txt "
