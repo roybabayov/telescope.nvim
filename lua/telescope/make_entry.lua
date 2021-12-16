@@ -351,19 +351,18 @@ function make_entry.gen_from_lsp_reference(opts)
     buffer_nr = vim.uri_to_bufnr(file_uri)
     position_params = { textDocument = { uri = file_uri}, position = { line = entry.lnum-1, character = entry.col-1} }
 
-    print('hi', entry.filename, filename, entry.lnum, entry.col, buffer_nr, file_uri)
-
-    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 100)
+    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 10000)
     if err then
-        entry_type = "txt "
+        entry_type = "err "
     else 
         for _, server_results in pairs(results_lsp) do 
             for _,entry in pairs(server_results.result) do 
-                print(entry.range.start.line, entry.range.start.character, entry.range["end"].line, entry.range["end"].character, entry.role, entry.kind)
                 if entry.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
                     entry_type = "set "
-                else
+                elseif entry.kind == vim.lsp.protocol.DocumentHighlightKind.Read then
                     entry_type = "get "
+                else
+                    entry_type = "txt "
                 end
             end 
         end
