@@ -346,7 +346,7 @@ function make_entry.gen_from_lsp_reference(opts)
 
     local line_info = { table.concat({ entry.lnum, entry.col }, ":"), "TelescopeResultsLineNr" }
 
-    print('hi', filename, line_info)
+    print('hi', entry.filename, filename, line_info)
 
 
     local entry_type = "tmp "
