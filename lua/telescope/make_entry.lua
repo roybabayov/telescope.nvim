@@ -349,7 +349,7 @@ function make_entry.gen_from_lsp_reference(opts)
     print('hi', filename, line_info)
 
     return displayer {
-      "tmp"
+      "tmp",
       line_info,
       entry.text:gsub(".* | ", ""),
       filename,
