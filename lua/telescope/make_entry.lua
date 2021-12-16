@@ -359,7 +359,12 @@ function make_entry.gen_from_lsp_reference(opts)
     else 
         for _, server_results in pairs(results_lsp) do 
             for _,entry in pairs(server_results.result) do 
-                print(entry.range.start.line, entry.range.start.character, entry.range["end"].line, entry.range["end"].character, entry.role, entry.kind) 
+                print(entry.range.start.line, entry.range.start.character, entry.range["end"].line, entry.range["end"].character, entry.role, entry.kind)
+                if entry.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
+                    entry_type = "set "
+                else
+                    entry_type = "get "
+                end
             end 
         end
     end
