@@ -15,7 +15,7 @@ local lsp = {}
 lsp.references = function(opts)
   local params = vim.lsp.util.make_position_params()
   params.context = { includeDeclaration = true }
-
+    print (params.textDocument.uri, params.position.line, params.position.character)
   local results_lsp, err = vim.lsp.buf_request_sync(0, "textDocument/references", params, opts.timeout or 10000)
   if err then
     vim.api.nvim_err_writeln("Error when finding references: " .. err)
