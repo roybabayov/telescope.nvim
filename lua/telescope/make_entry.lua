@@ -346,12 +346,14 @@ function make_entry.gen_from_lsp_reference(opts)
 
     local line_info = { table.concat({ entry.lnum, entry.col }, ":"), "TelescopeResultsLineNr" }
 
-    print('hi', entry.filename, filename, line_info)
-
-
     local entry_type = "tmp "
-    position_params = { textDocument = { uri = vim.uri_from_fname(entry.filename)}, position = { line = entry.lnum-1, character = entry.col-1} }
-    results_lsp, err = vim.lsp.buf_request_sync(0, "textDocument/documentHighlight", position_params, opts.timeout or 10000)
+    file_uri = vim.uri_from_fname(entry.filename)
+    buffer_nr = vim.uri_to_bufnr(file_uri)
+    position_params = { textDocument = { uri = file_uri}, position = { line = entry.lnum-1, character = entry.col-1} }
+
+    print('hi', entry.filename, filename, entry.lnum, entry.col, buffer_nr, file_uri)
+
+    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 100)
     if err then
         entry_type = "txt "
     else 
