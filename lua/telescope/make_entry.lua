@@ -346,23 +346,24 @@ function make_entry.gen_from_lsp_reference(opts)
 
     local line_info = { table.concat({ entry.lnum, entry.col }, ":"), "TelescopeResultsLineNr" }
 
+    print('hi', filename, line_info)
+
+
+    local entry_type = "tmp "
     position_params = { textDocument = { uri = filename}, position = { line = entry.lnum, character = entry.col} }
     results_lsp, err = vim.lsp.buf_request_sync(0, "textDocument/documentHighlight", position_params, opts.timeout or 10000)
     if err then
-      vim.api.nvim_err_writeln("Error when finding references: " .. err)
-      return
-    end
-
-    print('hi', filename, line_info)
-
-    for _, server_results in pairs(results_lsp) do 
-        for _,entry in pairs(server_results.result) do 
-            print(entry.range.start.line, entry.range.start.character, entry.range["end"].line, entry.range["end"].character, entry.role, entry.kind) 
-        end 
+        entry_type = "txt "
+    else 
+        for _, server_results in pairs(results_lsp) do 
+            for _,entry in pairs(server_results.result) do 
+                print(entry.range.start.line, entry.range.start.character, entry.range["end"].line, entry.range["end"].character, entry.role, entry.kind) 
+            end 
+        end
     end
 
     return displayer {
-      "tmp ",
+      entry_type,
       line_info,
       entry.text:gsub(".* | ", ""),
       filename,
