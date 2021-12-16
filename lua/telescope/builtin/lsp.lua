@@ -37,7 +37,7 @@ lsp.references = function(opts)
     prompt_title = "LSP References",
     finder = finders.new_table {
       results = locations,
-      entry_maker = opts.entry_maker or make_entry.gen_from_lsp_reference(opts),
+      entry_maker = vim.F.if_nil(opts.entry_maker or make_entry.gen_from_lsp_reference(opts)),
     },
     previewer = conf.qflist_previewer(opts),
     sorter = conf.generic_sorter(opts),
