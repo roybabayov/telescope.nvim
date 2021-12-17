@@ -355,7 +355,6 @@ function make_entry.gen_from_lsp_reference(opts)
     local res_text = "-"
     local res_write = "-"
     local res_err = "-"
-    print(entry.filename, buffer_nr, entry_line, entry_col)
 
     results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 1000)
     if err then
@@ -363,7 +362,6 @@ function make_entry.gen_from_lsp_reference(opts)
     else
         for _, server_results in pairs(results_lsp) do 
             for _, ref in pairs(server_results.result) do 
-                print(entry.filename, buffer_nr, entry_line, entry_col, ref.range.start.line, ref.range.start.character, ref.kind)
                 if ref.range.start.line == entry_line and ref.range.start.character == entry_col then
                     if ref.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
                         res_write = "w"
