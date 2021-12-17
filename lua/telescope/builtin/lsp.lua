@@ -39,6 +39,7 @@ lsp.references = function(opts)
         file_uri = vim.uri_from_fname(entry.filename)
         buffer_nr = vim.uri_to_bufnr(file_uri)
         print(file_uri, buffer_nr)
+        locations[key].entry_type = "----"
         if not buffers[buffer_nr] then
             buffers[buffer_nr] = buffer_nr
             entry_line = entry.lnum - 1

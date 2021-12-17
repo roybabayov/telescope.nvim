@@ -377,7 +377,7 @@ function make_entry.gen_from_lsp_reference(opts)
     entry_type = string.format("%s%s%s%s", res_err, res_text, res_read, res_write)
 --]]
     return displayer {
-      "----",
+      entry.entry_type,
       line_info,
       entry.text:gsub(".* | ", ""),
       filename,
@@ -398,6 +398,7 @@ function make_entry.gen_from_lsp_reference(opts)
       filename = filename,
       lnum = entry.lnum,
       col = entry.col,
+      entry_type = entry.entry_type,
       text = entry.text,
       start = entry.start,
       finish = entry.finish,
