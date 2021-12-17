@@ -36,12 +36,15 @@ lsp.references = function(opts)
   print("hi")
   for key, entry in pairs(locations) do
     if not entry.entry_type then
-        file_uri = vim.uri_from_fname(entry.filename)
-        buffer_nr = vim.uri_to_bufnr(file_uri)
-        print(file_uri, buffer_nr)
+        filename = entry.filename or vim.api.nvim_buf_get_name(entry.bufnr)
+        print(filename)
         locations[key].entry_type = "----"
-        if not buffers[buffer_nr] then
-            buffers[buffer_nr] = buffer_nr
+        if not buffers[filename] then
+            buffers[filename] = filename
+            file_uri = vim.uri_from_fname(entry.filename)
+            vim.cmd(string.format("e %s", filename))
+            buffer_nr = vim.uri_to_bufnr(file_uri)
+
             entry_line = entry.lnum - 1
             entry_col = entry.col - 1
             position_params = { textDocument = { uri = file_uri}, position = { line = entry_line, character = entry_col} }
@@ -75,7 +78,7 @@ lsp.references = function(opts)
                                 end
                             end
                             locations[key2].entry_type = string.format("-%s%s%s", res_text, res_read, res_write)
-                            print(file_uri, buffer_nr, locations[key2].lnum - 1, locations[key2].col - 1, entry_type)
+                            print(file_uri, buffer_nr, locations[key2].lnum - 1, locations[key2].col - 1, locations[key2].entry_type)
                         end
                     end 
                 end
