@@ -348,32 +348,32 @@ function make_entry.gen_from_lsp_reference(opts)
 
     local entry_line = entry.lnum-1
     local entry_col = entry.col-1
-    local entry_type = "txt "
     local file_uri = vim.uri_from_fname(entry.filename)
     local buffer_nr = vim.uri_to_bufnr(file_uri)
     local position_params = { textDocument = { uri = file_uri}, position = { line = entry_line, character = entry_col} }
-
+    local read = "-"
+    local text = "-"
+    local write = "-"
     print(entry.filename, buffer_nr, entry_line, entry_col)
 
     results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 100)
-    if err then
-        entry_type = "---"
-    else 
+    if not err then
         for _, server_results in pairs(results_lsp) do 
             for _, ref in pairs(server_results.result) do 
                 print(entry.filename, buffer_nr, entry_line, entry_col, ref.range.start.line, ref.range.start.character, ref.kind)
                 if ref.range.start.line == entry_line and ref.range.start.character == entry_col then
                     if ref.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
-                        entry_type[1] = "w"
+                        write = "w"
                     elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Read then
-                        entry_type[2] = "r"
+                        read = "r"
                     else
-                        entry_type[3] = "t"
+                        text = "t"
                     end
                 end
             end 
         end
     end
+    entry_type = string.format("%c%c%c", read, write, text)
 
     return displayer {
       entry_type,
