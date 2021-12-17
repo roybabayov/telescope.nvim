@@ -334,7 +334,7 @@ function make_entry.gen_from_lsp_reference(opts)
   local displayer = entry_display.create {
     separator = "▏",
     items = {
-      { width = 4 },
+      { width = 5 },
       { width = 8 },
       { width = 50 },
       { remaining = true },
@@ -354,10 +354,13 @@ function make_entry.gen_from_lsp_reference(opts)
     local read = "-"
     local text = "-"
     local write = "-"
+    local err = "-"
     print(entry.filename, buffer_nr, entry_line, entry_col)
 
-    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 100)
-    if not err then
+    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 1000)
+    if err then
+        err = "e"
+    else
         for _, server_results in pairs(results_lsp) do 
             for _, ref in pairs(server_results.result) do 
                 print(entry.filename, buffer_nr, entry_line, entry_col, ref.range.start.line, ref.range.start.character, ref.kind)
@@ -366,14 +369,14 @@ function make_entry.gen_from_lsp_reference(opts)
                         write = "w"
                     elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Read then
                         read = "r"
-                    else
+                    elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Text then
                         text = "t"
                     end
                 end
             end 
         end
     end
-    entry_type = string.format("%s%s%s", text, read, write)
+    entry_type = string.format("%s%s%s%s", err, text, read, write)
 
     return displayer {
       entry_type,
