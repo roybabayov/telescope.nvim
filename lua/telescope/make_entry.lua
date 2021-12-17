@@ -356,7 +356,7 @@ function make_entry.gen_from_lsp_reference(opts)
     local res_write = "-"
     local res_err = "-"
 
-    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 1000)
+    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 100)
     if err then
         res_err = "e"
     else
