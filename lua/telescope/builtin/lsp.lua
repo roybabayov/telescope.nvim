@@ -42,8 +42,13 @@ lsp.references = function(opts)
         if not buffers[filename] then
             buffers[filename] = filename
             file_uri = vim.uri_from_fname(entry.filename)
-            vim.cmd(string.format("e %s", filename))
+            buffer_opened = false
             buffer_nr = vim.uri_to_bufnr(file_uri)
+            if not vim.api.nvim_buf_is_loaded(buffer_nr) then
+                buffer_opened = true
+                vim.cmd(string.format("e %s", filename))
+                buffer_nr = vim.uri_to_bufnr(file_uri)
+            end
 
             entry_line = entry.lnum - 1
             entry_col = entry.col - 1
@@ -83,6 +88,9 @@ lsp.references = function(opts)
                     end 
                 end
             end
+            if buffer_opened then
+                vim.api.nvim_buf_delete(buffer_nr, {})
+            end 
         end
     end
   end
