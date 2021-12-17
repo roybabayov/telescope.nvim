@@ -33,7 +33,6 @@ lsp.references = function(opts)
   end
 
   buffers = {}
-  print("hi")
   for key, entry in pairs(locations) do
     if not entry.entry_type then
         filename = entry.filename or vim.api.nvim_buf_get_name(entry.bufnr)
@@ -46,7 +45,7 @@ lsp.references = function(opts)
             buffer_nr = vim.uri_to_bufnr(file_uri)
             if not vim.api.nvim_buf_is_loaded(buffer_nr) then
                 buffer_opened = true
-                vim.cmd(string.format("e %s", filename))
+                vim.cmd(string.format("view %s", filename))
                 buffer_nr = vim.uri_to_bufnr(file_uri)
             end
 
@@ -54,17 +53,13 @@ lsp.references = function(opts)
             entry_col = entry.col - 1
             position_params = { textDocument = { uri = file_uri}, position = { line = entry_line, character = entry_col} }
             results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 10000)
-            print("new", file_uri, buffer_nr)
             if err then
-                print("err", file_uri, buffer_nr)
                 for key2, entry2 in pairs(locations) do
                     if entry2.filename == entry.filename then
                         locations[key2].entry_type = "e---"
-                        print("err", file_uri, buffer_nr, locations[key2].lnum - 1, locations[key2].col - 1)
                     end
                 end
             else
-                print("good", file_uri, buffer_nr)
                 for _, server_results in pairs(results_lsp) do
                     for key2, entry2 in pairs(locations) do
                         if entry2.filename == entry.filename then
@@ -83,7 +78,6 @@ lsp.references = function(opts)
                                 end
                             end
                             locations[key2].entry_type = string.format("-%s%s%s", res_text, res_read, res_write)
-                            print(file_uri, buffer_nr, locations[key2].lnum - 1, locations[key2].col - 1, locations[key2].entry_type)
                         end
                     end 
                 end

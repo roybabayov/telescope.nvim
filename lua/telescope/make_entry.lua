@@ -346,36 +346,6 @@ function make_entry.gen_from_lsp_reference(opts)
 
     local line_info = { table.concat({ entry.lnum, entry.col }, ":"), "TelescopeResultsLineNr" }
 
-    --[[local entry_line = entry.lnum-1
-    local entry_col = entry.col-1
-    local file_uri = vim.uri_from_fname(entry.filename)
-    local buffer_nr = vim.uri_to_bufnr(file_uri)
-    local position_params = { textDocument = { uri = file_uri}, position = { line = entry_line, character = entry_col} }
-    local res_read = "-"
-    local res_text = "-"
-    local res_write = "-"
-    local res_err = "-"
-
-    results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 100)
-    if err then
-        res_err = "e"
-    else
-        for _, server_results in pairs(results_lsp) do 
-            for _, ref in pairs(server_results.result) do 
-                if ref.range.start.line == entry_line and ref.range.start.character == entry_col then
-                    if ref.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
-                        res_write = "w"
-                    elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Read then
-                        res_read = "r"
-                    elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Text then
-                        res_text = "t"
-                    end
-                end
-            end 
-        end
-    end
-    entry_type = string.format("%s%s%s%s", res_err, res_text, res_read, res_write)
---]]
     return displayer {
       entry.entry_type,
       line_info,
