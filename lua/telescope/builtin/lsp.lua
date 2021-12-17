@@ -32,6 +32,51 @@ lsp.references = function(opts)
     return
   end
 
+  buffers = {}
+  for key, entry in pairs(locations) do
+    if not entry.entry_type then
+        file_uri = vim.uri_from_fname(entry.filename)
+        buffer_nr = vim.uri_to_bufnr(file_uri)
+        if not buffers[buffer_nr] then
+            buffers[buffer_nr] = buffer_nr
+            entry_line = entry.lnum - 1
+            entry_col = entry.col - 1
+            position_params = { textDocument = { uri = file_uri}, position = { line = entry_line, character = entry_col} }
+            results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 10000)
+            if err then
+                for key2, entry2 in pairs(locations) do
+                    if entry2.filename == entry.filename then
+                        locations[key2].entry_type = "e---"
+                    end
+                end
+            else
+                for _, server_results in pairs(results_lsp) do
+                    for key2, entry2 in pairs(locations) do
+                        if entry2.filename == entry.filename then
+                            res_text = "-"
+                            res_read = "-"
+                            res_write = "-"
+                            for _, ref in pairs(server_results.result) do
+                                if ref.range.start.line == entry2.lnum - 1 and ref.range.start.character == entry2.col - 1 then
+                                    if ref.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
+                                        res_write = "w"
+                                    elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Read then
+                                        res_read = "r"
+                                    elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Text then
+                                        res_text = "t"
+                                    end
+                                end
+                            end
+                            locations[key2].entry_type = string.format("-%s%s%s", res_text, res_read, res_write)
+                        end
+                    end 
+                end
+            end
+        end
+    end
+  end
+
+
   pickers.new(opts, {
     prompt_title = "LSP References",
     finder = finders.new_table {

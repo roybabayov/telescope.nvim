@@ -346,7 +346,7 @@ function make_entry.gen_from_lsp_reference(opts)
 
     local line_info = { table.concat({ entry.lnum, entry.col }, ":"), "TelescopeResultsLineNr" }
 
-    local entry_line = entry.lnum-1
+    --[[local entry_line = entry.lnum-1
     local entry_col = entry.col-1
     local file_uri = vim.uri_from_fname(entry.filename)
     local buffer_nr = vim.uri_to_bufnr(file_uri)
@@ -375,9 +375,9 @@ function make_entry.gen_from_lsp_reference(opts)
         end
     end
     entry_type = string.format("%s%s%s%s", res_err, res_text, res_read, res_write)
-
+--]]
     return displayer {
-      entry_type,
+      entry.entry_type,
       line_info,
       entry.text:gsub(".* | ", ""),
       filename,
