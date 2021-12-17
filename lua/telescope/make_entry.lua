@@ -373,7 +373,7 @@ function make_entry.gen_from_lsp_reference(opts)
             end 
         end
     end
-    entry_type = string.format("%s%s%s", read, write, text)
+    entry_type = string.format("%s%s%s", text, read, write)
 
     return displayer {
       entry_type,
