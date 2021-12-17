@@ -347,9 +347,11 @@ function make_entry.gen_from_lsp_reference(opts)
     local line_info = { table.concat({ entry.lnum, entry.col }, ":"), "TelescopeResultsLineNr" }
 
     local entry_type = "txt "
-    file_uri = vim.uri_from_fname(entry.filename)
-    buffer_nr = vim.uri_to_bufnr(file_uri)
-    position_params = { textDocument = { uri = file_uri}, position = { line = entry.lnum-1, character = entry.col-1} }
+    local file_uri = vim.uri_from_fname(entry.filename)
+    local buffer_nr = vim.uri_to_bufnr(file_uri)
+    local position_params = { textDocument = { uri = file_uri}, position = { line = entry.lnum-1, character = entry.col-1} }
+
+    print(entry.filename, buffer_nr, entry.bufnr, entry.lnum, entry.col, entry.start.line, entry.start.character, entry.text)
 
     results_lsp, err = vim.lsp.buf_request_sync(buffer_nr, "textDocument/documentHighlight", position_params, opts.timeout or 100)
     if err then
@@ -357,12 +359,14 @@ function make_entry.gen_from_lsp_reference(opts)
     else 
         for _, server_results in pairs(results_lsp) do 
             for _, ref in pairs(server_results.result) do 
-                if ref.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
-                    entry_type = "set "
-                elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Read then
-                    entry_type = "get "
-                else
-                    entry_type = "txt "
+                if ref.range.start.line == entry.start.line and ref.range.start.character == entry.start.character then
+                    if ref.kind == vim.lsp.protocol.DocumentHighlightKind.Write then
+                        entry_type = "set "
+                    elseif ref.kind == vim.lsp.protocol.DocumentHighlightKind.Read then
+                        entry_type = "get "
+                    else
+                        entry_type = "txt "
+                    end
                 end
             end 
         end
