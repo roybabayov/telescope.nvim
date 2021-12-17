@@ -51,7 +51,7 @@ lsp.references = function(opts)
                 print("err", file_uri, buffer_nr)
                 for key2, entry2 in pairs(locations) do
                     if entry2.filename == entry.filename then
-                        --locations[key2].entry_type = "e---"
+                        locations[key2].entry_type = "e---"
                         print("err", file_uri, buffer_nr, locations[key2].lnum - 1, locations[key2].col - 1)
                     end
                 end
@@ -74,8 +74,7 @@ lsp.references = function(opts)
                                     end
                                 end
                             end
-                            entry_type = string.format("-%s%s%s", res_text, res_read, res_write)
-                            --locations[key2].entry_type = entry_type
+                            locations[key2].entry_type = string.format("-%s%s%s", res_text, res_read, res_write)
                             print(file_uri, buffer_nr, locations[key2].lnum - 1, locations[key2].col - 1, entry_type)
                         end
                     end 
